@@ -5,6 +5,8 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import Categories from './pages/Categories';
+import POS from './pages/POS';
+import Sales from './pages/Sales';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
@@ -26,6 +28,12 @@ export default function App() {
         } />
         <Route path="/categories" element={
           <ProtectedRoute><Categories /></ProtectedRoute>
+        } />
+        <Route path="/pos" element={
+          <ProtectedRoute><POS /></ProtectedRoute>
+        } />
+        <Route path="/sales" element={
+          <ProtectedRoute><Sales /></ProtectedRoute>
         } />
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>

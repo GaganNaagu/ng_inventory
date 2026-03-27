@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../lib/axios';
 import Layout from '../components/Layout';
 import { Plus, Pencil, Trash2, X } from 'lucide-react';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 interface Category {
   id: string;
@@ -15,6 +16,7 @@ export default function Categories() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const fetchCategories = async () => {
     try {
@@ -45,13 +47,20 @@ export default function Categories() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Delete this category?')) return;
+  const confirmDelete = (id: string) => {
+    setDeleteId(id);
+    setError('');
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
     try {
-      await api.delete(`/categories/${id}`);
+      await api.delete(`/categories/${deleteId}`);
+      setDeleteId(null);
       fetchCategories();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to delete');
+      setError(err.response?.data?.error || 'Failed to delete');
+      setDeleteId(null);
     }
   };
 
@@ -63,6 +72,12 @@ export default function Categories() {
           <Plus size={16} /> Add Category
         </button>
       </div>
+
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded-lg border border-red-200 dark:border-red-800">
+          {error}
+        </div>
+      )}
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-orange-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -80,7 +95,7 @@ export default function Categories() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{new Date(cat.created_at).toLocaleDateString()}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm space-x-2">
                   <button onClick={() => openEdit(cat)} className="text-orange-600 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-300 transition-colors"><Pencil size={16} /></button>
-                  <button onClick={() => handleDelete(cat.id)} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors"><Trash2 size={16} /></button>
+                  <button onClick={() => confirmDelete(cat.id)} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors"><Trash2 size={16} /></button>
                 </td>
               </tr>
             ))}
@@ -112,6 +127,15 @@ export default function Categories() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteId}
+        title="Delete Category"
+        message="Are you sure you want to delete this category? This action cannot be undone."
+        confirmText="Delete"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </Layout>
   );
 }

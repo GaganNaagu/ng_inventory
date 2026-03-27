@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../lib/axios';
 import Layout from '../components/Layout';
 import { Plus, Pencil, Trash2, X, Search, AlertTriangle } from 'lucide-react';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 interface Category { id: string; name: string; }
 interface Product {
@@ -21,6 +22,7 @@ export default function Products() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', sku: '', description: '', price: '', quantity: '', reorder_threshold: '10', category_id: '', expiry_date: '' });
   const [error, setError] = useState('');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const fetchProducts = async () => {
     try {
@@ -75,9 +77,21 @@ export default function Products() {
     } catch (err: any) { setError(err.response?.data?.error || 'Failed'); }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Delete this product?')) return;
-    try { await api.delete(`/products/${id}`); fetchProducts(); } catch (err: any) { alert(err.response?.data?.error || 'Failed'); }
+  const confirmDelete = (id: string) => {
+    setDeleteId(id);
+    setError('');
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    try { 
+      await api.delete(`/products/${deleteId}`); 
+      setDeleteId(null);
+      fetchProducts(); 
+    } catch (err: any) { 
+      setError(err.response?.data?.error || 'Failed'); 
+      setDeleteId(null);
+    }
   };
 
   const inputClasses = "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-orange-500 focus:border-orange-500 transition-colors";
@@ -90,6 +104,12 @@ export default function Products() {
           <Plus size={16} /> Add Product
         </button>
       </div>
+
+      {error && !showModal && (
+        <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded-lg border border-red-200 dark:border-red-800">
+          {error}
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-4">
@@ -143,7 +163,7 @@ export default function Products() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm space-x-2">
                   <button onClick={() => openEdit(p)} className="text-orange-600 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-300 transition-colors"><Pencil size={16} /></button>
-                  <button onClick={() => handleDelete(p.id)} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors"><Trash2 size={16} /></button>
+                  <button onClick={() => confirmDelete(p.id)} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors"><Trash2 size={16} /></button>
                 </td>
               </tr>
             ))}
@@ -220,6 +240,15 @@ export default function Products() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteId}
+        title="Delete Product"
+        message="Are you sure you want to delete this product? This action cannot be undone."
+        confirmText="Delete"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </Layout>
   );
 }

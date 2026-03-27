@@ -11,4 +11,50 @@
   body.dark {
     @apply bg-gray-900 text-gray-100;
   }
+
+  /* Global Scrollbar Design - Default/Light Mode */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-orange-50;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-orange-300 rounded-full transition-colors;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-orange-400;
+  }
+
+  /* Global Scrollbar Design - Dark Mode */
+  html.dark::-webkit-scrollbar-track,
+  html.dark *::-webkit-scrollbar-track {
+    @apply bg-gray-900;
+  }
+
+  html.dark::-webkit-scrollbar-thumb,
+  html.dark *::-webkit-scrollbar-thumb {
+    @apply bg-gray-600;
+  }
+
+  html.dark::-webkit-scrollbar-thumb:hover,
+  html.dark *::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500;
+  }
+
+  /* Standard CSS Scrollbar (Firefox) */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.orange.300') theme('colors.orange.50');
+  }
+
+  html.dark,
+  html.dark * {
+    scrollbar-color: theme('colors.gray.600') theme('colors.gray.900');
+  }
 }
+
