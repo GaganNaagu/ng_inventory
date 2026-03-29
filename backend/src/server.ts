@@ -6,6 +6,7 @@ import authRoutes from './routes/authRoutes';
 import categoryRoutes from './routes/categoryRoutes';
 import productRoutes from './routes/productRoutes';
 import saleRoutes from './routes/saleRoutes';
+import analyticsRoutes from './routes/analyticsRoutes';
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/sales', saleRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
