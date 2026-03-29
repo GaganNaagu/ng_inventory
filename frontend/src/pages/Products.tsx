@@ -3,6 +3,7 @@ import { api } from '../lib/axios';
 import Layout from '../components/Layout';
 import { Plus, Pencil, Trash2, X, Search, AlertTriangle } from 'lucide-react';
 import ConfirmDialog from '../components/ConfirmDialog';
+import toast from 'react-hot-toast';
 
 interface Category { id: string; name: string; }
 interface Product {
@@ -74,7 +75,7 @@ export default function Products() {
         await api.post('/products', payload);
       }
       setShowModal(false); fetchProducts();
-    } catch (err: any) { setError(err.response?.data?.error || 'Failed'); }
+    } catch (err: any) { toast.error(err.response?.data?.error || 'Failed'); }
   };
 
   const confirmDelete = (id: string) => {
@@ -89,7 +90,7 @@ export default function Products() {
       setDeleteId(null);
       fetchProducts(); 
     } catch (err: any) { 
-      setError(err.response?.data?.error || 'Failed'); 
+      toast.error(err.response?.data?.error || 'Failed'); 
       setDeleteId(null);
     }
   };
@@ -105,11 +106,7 @@ export default function Products() {
         </button>
       </div>
 
-      {error && !showModal && (
-        <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded-lg border border-red-200 dark:border-red-800">
-          {error}
-        </div>
-      )}
+
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-4">
@@ -131,7 +128,7 @@ export default function Products() {
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-orange-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-orange-100 dark:border-gray-700 overflow-hidden transition-colors duration-300 overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-orange-50 dark:bg-gray-700">
             <tr>

@@ -36,3 +36,11 @@
 **Status**: ⬜ Not Started
 **Objective**: Connect OpenAI API to analyze sales data via scheduled jobs. Display AI recommendations in the UI.
 **Requirements**: REQ-06
+
+### Phase 6: Gap Closure
+**Status**: ⬜ Not Started
+**Objective**: Address gaps from milestone audit
+
+**Gaps to Close:**
+- [ ] Connect real AI Provider to aiService.ts (OpenAI API integration)
+- [ ] Implement pagination or infinite scroll on POS interface product grid

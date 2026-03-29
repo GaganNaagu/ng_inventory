@@ -7,6 +7,8 @@ import categoryRoutes from './routes/categoryRoutes';
 import productRoutes from './routes/productRoutes';
 import saleRoutes from './routes/saleRoutes';
 import analyticsRoutes from './routes/analyticsRoutes';
+import { registerAnalyticsCron } from './jobs/analyticsJob';
+import { registerAISummaryCron } from './jobs/aiSummaryJob';
 
 dotenv.config();
 
@@ -32,4 +34,8 @@ app.get('/health', (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
+
+  // Register background jobs
+  registerAnalyticsCron();
+  registerAISummaryCron();
 });

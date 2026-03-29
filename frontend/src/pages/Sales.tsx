@@ -31,7 +31,7 @@ export default function Sales() {
         </h1>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-orange-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-orange-100 dark:border-gray-700 overflow-hidden transition-colors duration-300 overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-orange-50 dark:bg-gray-700">
             <tr>

@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 import { api } from '../lib/axios';
 import { TrendingUp, TrendingDown, DollarSign, Package, AlertTriangle, Sparkles, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface DashboardData {
   salesSummary: { today: number; thisWeek: number; thisMonth: number; };
@@ -22,7 +23,7 @@ export default function Dashboard() {
       const res = await api.get('/analytics/dashboard');
       setData(res.data);
     } catch (e: any) {
-      setError(e.response?.data?.error || 'Failed to load dashboard data');
+      toast.error(e.response?.data?.error || 'Failed to load dashboard data');
     }
   };
 
@@ -35,7 +36,7 @@ export default function Dashboard() {
       const res = await api.post('/analytics/insights');
       setInsights(res.data.insights);
     } catch (e: any) {
-      setError(e.response?.data?.error || 'Failed to generate insights');
+      toast.error(e.response?.data?.error || 'Failed to generate insights');
     } finally {
       setLoadingInsights(false);
     }
@@ -52,13 +53,13 @@ export default function Dashboard() {
         </div>
         <button 
           onClick={generateInsights} disabled={loadingInsights}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 dark:from-orange-600 dark:to-orange-500 text-white rounded-lg text-sm font-bold shadow hover:opacity-90 transition disabled:opacity-50 transition-colors duration-300">
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 dark:from-orange-600 dark:to-orange-500 text-white rounded-lg text-sm font-bold shadow hover:opacity-90 disabled:opacity-50 transition-colors duration-300">
           {loadingInsights ? <Loader2 className="animate-spin" size={16} /> : <Sparkles size={16} />}
           Generate AI Insights
         </button>
       </div>
 
-      {error && <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded-lg border border-red-200 dark:border-red-800 transition-colors duration-300">{error}</div>}
+
 
       {/* AI Insights Panel */}
       {insights && (

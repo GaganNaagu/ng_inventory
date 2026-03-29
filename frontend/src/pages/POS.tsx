@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { api } from '../lib/axios';
 import Layout from '../components/Layout';
 import { Search, ShoppingCart, Plus, Minus, Trash2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface Product {
   id: string; name: string; sku: string; price: number; quantity: number;
@@ -12,18 +13,47 @@ export default function POS() {
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [search, setSearch] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const PAGE_SIZE = 20;
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (offset = 0, append = false) => {
     try {
-      const res = await api.get('/products', { params: { search } });
-      setProducts(res.data);
+      if (!append) setLoadingMore(true);
+      const res = await api.get('/products', { params: { search, limit: PAGE_SIZE, offset } });
+      const newProducts: Product[] = res.data;
+      if (append) {
+        setProducts(prev => [...prev, ...newProducts]);
+      } else {
+        setProducts(newProducts);
+      }
+      setHasMore(newProducts.length === PAGE_SIZE);
     } catch (e) { console.error(e); }
+    finally { setLoadingMore(false); }
   };
 
-  useEffect(() => { fetchProducts(); }, [search]);
-  useEffect(() => { if(success || error) { const t = setTimeout(()=>{setSuccess(''); setError('');}, 5000); return ()=>clearTimeout(t); } }, [success, error]);
+  // Reset pagination when search changes
+  useEffect(() => {
+    setPage(0);
+    setHasMore(true);
+    fetchProducts(0, false);
+  }, [search]);
+
+  // Load more when page increments
+  useEffect(() => {
+    if (page > 0) fetchProducts(page * PAGE_SIZE, true);
+  }, [page]);
+
+  // Infinite scroll handler
+  const handleScroll = useCallback(() => {
+    const el = gridRef.current;
+    if (!el || loadingMore || !hasMore) return;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 100) {
+      setPage(prev => prev + 1);
+    }
+  }, [loadingMore, hasMore]);
 
   const addToCart = (product: Product) => {
     setCart(prev => {
@@ -77,11 +107,13 @@ export default function POS() {
       await api.post('/sales', {
         items: cart.map(item => ({ productId: item.id, quantity: item.cartQuantity }))
       });
-      setSuccess('Sale completed successfully!');
+      toast.success('Sale completed successfully!');
       setCart([]);
-      fetchProducts(); // Refresh stock
+      setPage(0);
+      setHasMore(true);
+      fetchProducts(0, false); // Refresh stock
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Checkout failed');
+      toast.error(err.response?.data?.error || 'Checkout failed');
     }
   };
 
@@ -89,7 +121,7 @@ export default function POS() {
 
   return (
     <Layout>
-      <div className="flex h-[calc(100vh-8rem)] gap-6">
+      <div className="flex flex-col md:flex-row h-auto md:h-[calc(100vh-8rem)] gap-6">
         
         {/* Products Grids */}
         <div className="flex-1 flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow border border-orange-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
@@ -100,7 +132,7 @@ export default function POS() {
                 className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-orange-500 focus:border-orange-500 transition-colors" />
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 grid grid-cols-2 lg:grid-cols-3 gap-4">
+          <div ref={gridRef} onScroll={handleScroll} className="flex-1 overflow-y-auto p-4 grid grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-min content-start">
             {products.map(p => {
               const inCart = cart.some(item => item.id === p.id);
               return (
@@ -138,7 +170,7 @@ export default function POS() {
         </div>
 
         {/* Cart */}
-        <div className="w-96 flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow border border-orange-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
+        <div className="w-full md:w-96 flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow border border-orange-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
           <div className="p-4 border-b border-orange-100 dark:border-gray-700 bg-orange-50 dark:bg-gray-700 flex justify-between items-center transition-colors duration-300">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2"><ShoppingCart size={20} /> Current Sale</h2>
             <span className="bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 text-xs font-bold px-2 py-1 rounded-full">{cart.length} items</span>
@@ -185,8 +217,7 @@ export default function POS() {
               <span className="text-2xl font-bold text-gray-900 dark:text-white">₹{total.toFixed(2)}</span>
             </div>
             
-            {error && <div className="mb-3 p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded-lg border border-red-200 dark:border-red-800">{error}</div>}
-            {success && <div className="mb-3 p-3 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm rounded-lg border border-green-200 dark:border-green-800">{success}</div>}
+
 
             <button onClick={handleCheckout} disabled={cart.length === 0}
               className={`w-full py-3 rounded-lg font-bold text-white transition-colors

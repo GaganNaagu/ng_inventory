@@ -7,6 +7,8 @@ export const getProducts = async (req: Request, res: Response) => {
       search: req.query.search as string | undefined,
       category_id: req.query.category_id as string | undefined,
       low_stock: req.query.low_stock === 'true',
+      limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
+      offset: req.query.offset ? parseInt(req.query.offset as string) : undefined,
     };
     const products = await productService.getAllProducts(filters);
     res.json(products);

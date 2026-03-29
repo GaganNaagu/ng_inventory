@@ -4,6 +4,8 @@ interface ProductFilters {
   search?: string;
   category_id?: string;
   low_stock?: boolean;
+  limit?: number;
+  offset?: number;
 }
 
 export const productRepository = {
@@ -35,6 +37,19 @@ export const productRepository = {
     }
 
     query += ' ORDER BY p.created_at DESC';
+
+    if (filters.limit) {
+      query += ` LIMIT $${paramIndex}`;
+      params.push(filters.limit);
+      paramIndex++;
+    }
+
+    if (filters.offset) {
+      query += ` OFFSET $${paramIndex}`;
+      params.push(filters.offset);
+      paramIndex++;
+    }
+
     const result = await pool.query(query, params);
     return result.rows;
   },

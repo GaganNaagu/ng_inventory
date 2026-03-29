@@ -3,6 +3,7 @@ import { api } from '../lib/axios';
 import Layout from '../components/Layout';
 import { Plus, Pencil, Trash2, X } from 'lucide-react';
 import ConfirmDialog from '../components/ConfirmDialog';
+import toast from 'react-hot-toast';
 
 interface Category {
   id: string;
@@ -43,7 +44,7 @@ export default function Categories() {
       setShowModal(false);
       fetchCategories();
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed');
+      toast.error(err.response?.data?.error || 'Failed');
     }
   };
 
@@ -59,7 +60,7 @@ export default function Categories() {
       setDeleteId(null);
       fetchCategories();
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to delete');
+      toast.error(err.response?.data?.error || 'Failed to delete');
       setDeleteId(null);
     }
   };
@@ -73,13 +74,9 @@ export default function Categories() {
         </button>
       </div>
 
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded-lg border border-red-200 dark:border-red-800">
-          {error}
-        </div>
-      )}
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-orange-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
+
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-orange-100 dark:border-gray-700 overflow-hidden transition-colors duration-300 overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-orange-50 dark:bg-gray-700">
             <tr>
