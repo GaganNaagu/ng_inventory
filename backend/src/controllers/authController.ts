@@ -6,10 +6,11 @@ export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
     const { token, user } = await verifyCredentialsAndGenerateToken(email, password);
 
+    const isProd = process.env.NODE_ENV === 'production';
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax', // Use 'none' in production for cross-domain support
       maxAge: 24 * 60 * 60 * 1000 // 1 day
     });
 
@@ -20,7 +21,12 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const logout = (req: Request, res: Response) => {
-  res.clearCookie('token');
+  const isProd = process.env.NODE_ENV === 'production';
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
+  });
   res.json({ message: 'Logout successful' });
 };
 
