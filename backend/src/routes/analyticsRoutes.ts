@@ -6,7 +6,7 @@ import { authorize } from '../middlewares/authorize';
 const router = Router();
 
 // Only Admins and Managers can access overarching analytics and AI
-router.get('/dashboard', authenticate, authorize('Admin', 'Manager'), getDashboard);
+router.get('/dashboard', authenticate, authorize('Admin', 'Manager', 'Staff'), getDashboard);
 router.post('/insights', authenticate, authorize('Admin', 'Manager'), generateInsights);
 
 export default router;
