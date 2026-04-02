@@ -8,6 +8,7 @@
     "build": "tsc",
     "db:migrate": "ts-node scripts/migrate.ts",
     "db:seed:admin": "ts-node scripts/seed_admin.ts",
+    "db:seed:dummy": "ts-node scripts/seed_dummy.ts",
     "test": "jest --forceExit --detectOpenHandles"
   },
   "dependencies": {
