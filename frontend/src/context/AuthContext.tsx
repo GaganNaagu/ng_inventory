@@ -10,7 +10,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (user: User) => void;
+  login: (user: User, token?: string) => void;
   logout: () => void;
 }
 
@@ -34,13 +34,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     fetchUser();
   }, []);
 
-  const login = (userData: User) => setUser(userData);
+  const login = (userData: User, token?: string) => {
+    if (token) {
+      localStorage.setItem('token', token);
+    }
+    setUser(userData);
+  };
+
   const logout = async () => {
     try {
       await api.post('/auth/logout');
-      setUser(null);
     } catch (e) {
-      console.error(e);
+      console.error('Logout failed:', e);
+    } finally {
+      localStorage.removeItem('token');
+      setUser(null);
     }
   };
 
